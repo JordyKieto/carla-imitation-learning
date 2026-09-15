@@ -2,9 +2,14 @@
 
 <p align="center"><img src="assets/driving.gif" alt="The learned policy driving closed-loop in CARLA" width="720"></p>
 
-A compact multimodal driving policy trained by **behavioral cloning** on expert demonstrations in the [CARLA](https://carla.org) simulator. The policy takes a short history of camera, LiDAR, vehicle telemetry and route waypoints and outputs continuous `throttle`, `brake` and `steer`. It then drives closed-loop: each prediction changes the next observation.
+<p align="center">
+  <a href="paper/paper.pdf"><b>📄 Paper (PDF)</b></a> &nbsp;·&nbsp;
+  <a href="https://youtu.be/rr_uS4bf0B4"><b>▶️ Video</b></a> &nbsp;·&nbsp;
+  <a href="results/training_curves.ipynb"><b>📈 Training curves</b></a> &nbsp;·&nbsp;
+  <a href="artifacts/"><b>🧠 Policy (Keras / ONNX)</b></a>
+</p>
 
-▶️ **Full demo video:** https://youtu.be/rr_uS4bf0B4 · 📄 **Technical report:** [PDF](paper/paper.pdf) · [Markdown](paper/paper.md) · 📈 **Training curves:** [results/training_curves.ipynb](results/training_curves.ipynb)
+A compact multimodal driving policy trained by **behavioral cloning** on expert demonstrations in the [CARLA](https://carla.org) simulator. The policy takes a short history of camera, LiDAR, vehicle telemetry and route waypoints and outputs continuous `throttle`, `brake` and `steer`. It then drives closed-loop: each prediction changes the next observation.
 
 This repository is a minimal, end-to-end reproduction of the pipeline:
 
@@ -18,8 +23,19 @@ The trained policy is included in `artifacts/` as both Keras and ONNX.
 
 ---
 
+## Paper
+
+**[Imitation Learning for Autonomous Driving in CARLA](paper/paper.pdf)**, Jordy Kieto, 2026 · [PDF](paper/paper.pdf) · [Markdown](paper/paper.md) · [LaTeX source](paper/paper.tex) · [Claim audit](paper/CLAIMS.md)
+
+The technical report studies how much closed-loop driving competence a multimodal behavioral-cloning policy acquires from offline demonstrations, and how the design of the demonstration distribution shapes what emerges. Highlights:
+
+- **Systematic route generation.** Demonstrations are collected by enumerating spawn points, querying the road graph for feasible maneuvers, and keeping autopilot rollouts only after verifying the maneuver actually executed: 448 captures, 236,882 windows, ≈3.3 h of driving on Town01 and Town02.
+- **Autoregressive driving.** Driving alone on the road with no human intervention, the policy drove for hours on training and held-out routes without collisions in the author's runs, and transferred qualitatively to an unseen CARLA town.
+- **Evidence-graded claims.** Every result is classified as measured, observed, inferred or unverified, and the released checkpoint's provenance is reconstructed from the training logs in [`results/`](results).
+
 ## Contents
 
+- [Paper](#paper)
 - [Model](#model)
 - [Repository layout](#repository-layout)
 - [Requirements](#requirements)
@@ -28,6 +44,7 @@ The trained policy is included in `artifacts/` as both Keras and ONNX.
 - [Data format](#data-format)
 - [Training details](#training-details)
 - [Known quirks and limitations](#known-quirks-and-limitations)
+- [Citation](#citation)
 
 ---
 
@@ -298,3 +315,15 @@ Worth knowing before building on this or interpreting results:
 - **Telemetry `speed_mps` and `speed_kph` are identical** after scaling (`tanh(v/20)` both).
 - **LiDAR BEV normalization** divides by the max bin, and the few returns closest to the ego vehicle often dominate it.
 - Simulation only. No other vehicles or pedestrians by default, and `collect.py`'s autopilot ignores traffic lights and stop signs.
+
+## Citation
+
+```bibtex
+@techreport{kieto2026imitation,
+  title       = {Imitation Learning for Autonomous Driving in {CARLA}},
+  author      = {Kieto, Jordy},
+  year        = {2026},
+  type        = {Technical Report},
+  url         = {https://github.com/JordyKieto/carla-imitation-learning}
+}
+```
