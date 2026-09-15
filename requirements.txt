@@ -1,0 +1,21 @@
+# Python 3.10-3.12 (3.11 recommended)
+
+# CARLA client — must match the CARLA server version (0.9.16). No macOS wheels.
+carla==0.9.16; sys_platform != "darwin"
+pygame>=2.5
+
+tensorflow==2.20.0
+numpy
+pandas
+pyarrow
+pyyaml
+python-dotenv
+
+# Optional integrations (used only when configured in .env)
+boto3
+wandb
+
+# ONNX export / inference (export_onnx.py)
+tf2onnx
+onnx
+onnxruntime

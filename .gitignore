@@ -1,0 +1,25 @@
+# Secrets
+.env
+secrets.yaml
+
+# Data and outputs
+recordings/
+datasets/
+checkpoints/
+wandb/
+*.log
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Private notes / large originals
+prompt.MD
+assets/originals/

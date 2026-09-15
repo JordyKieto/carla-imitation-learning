@@ -1,0 +1,77 @@
+# ============================================================
+# carla-imitation-learning — single non-secret configuration.
+# Credentials (AWS, W&B) live in .env — see .env.example.
+# ============================================================
+
+carla:
+  fixed_delta_seconds: 0.05        # 20 Hz synchronous simulation
+
+# ------------------------------------------------------------
+# Sensor rig attached to the ego vehicle (vehicle/vehicle_sensors.py)
+# ------------------------------------------------------------
+sensors:
+  camera:
+    width: 224                     # raw recordings store 224x224 RGB
+    height: 224
+    fov: 90
+    mount: {x: 0.4, y: 0.0, z: 1.6}
+
+  lidar:
+    height: 64                     # bird's-eye-view histogram size
+    width: 64
+    range_m: 50.0
+    rotation_frequency_hz: 20
+    channels: 32
+    points_per_second: 50000
+    upper_fov_deg: 15
+    lower_fov_deg: -25
+    horizontal_fov_deg: 360
+    hist:                          # BEV window in metres (front of the car only)
+      x_min: 0.0
+      x_max: 30.0
+      y_min: -10.0
+      y_max: 10.0
+
+waypoints:
+  path_len: 25                     # future lane waypoints, 2 m apart
+
+# ------------------------------------------------------------
+# Dataset (preprocess.py)
+# ------------------------------------------------------------
+data:
+  raw_dir: recordings              # drive.py / collect.py write here
+  processed_dir: datasets/processed
+  manifest_path: datasets/windows_manifest.parquet
+  vision_resize: [96, 96]          # 224x224 -> 96x96 for training
+  stack_size: 5                    # frames per training window
+  direction_steer_threshold: 0.08  # |steer| >= this => left/right, else straight
+  window_min_direction_share: 0.60 # drop windows whose frames disagree on direction
+
+# ------------------------------------------------------------
+# Training (train.py). Defaults match W&B run barzksni
+# ("MLP - Generalized Cross Map"); artifacts/policy.keras is its epoch-10 checkpoint.
+# ------------------------------------------------------------
+training:
+  run_name: mlp-generalized-cross-map
+  batch_size: 409
+  epochs: 100
+  learning_rate: 0.003
+  train_split: 0.7                 # per recording & direction, first 70% of windows
+  val_steps: 50
+  log_every_steps: 50
+  checkpoint_every_epochs: 10
+  checkpoint_dir: checkpoints
+  tags: []                         # e.g. ["Town01", "Town02"] to train on those maps only
+  seed: 42
+
+# ------------------------------------------------------------
+# Optional integrations (enabled when credentials exist in .env)
+# ------------------------------------------------------------
+s3:
+  raw_prefix: raw/
+  processed_prefix: processed/mlp/v1/
+  manifest_prefix: manifests/mlp/v1/
+  checkpoint_prefix: checkpoints/mlp/v1/
+
+wandb:
+  project: drift-mlp
