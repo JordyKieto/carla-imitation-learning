@@ -4,7 +4,7 @@
 
 A compact multimodal driving policy trained by **behavioral cloning** on expert demonstrations in the [CARLA](https://carla.org) simulator. The policy takes a short history of camera, LiDAR, vehicle telemetry and route waypoints and outputs continuous `throttle`, `brake` and `steer`. It then drives closed-loop: each prediction changes the next observation.
 
-▶️ **Full demo video:** https://youtu.be/rr_uS4bf0B4 · 📄 **Technical report:** [paper/paper.md](paper/paper.md) · 📈 **Training run:** [W&B](https://wandb.ai/drift-ai-models/drift-mlp/runs/barzksni)
+▶️ **Full demo video:** https://youtu.be/rr_uS4bf0B4 · 📄 **Technical report:** [PDF](paper/paper.pdf) · [Markdown](paper/paper.md) · 📈 **Training curves:** [results/training_curves.ipynb](results/training_curves.ipynb)
 
 This repository is a minimal, end-to-end reproduction of the pipeline:
 
@@ -83,7 +83,8 @@ The trained policy is included in `artifacts/` as both Keras and ONNX.
 │   └── policy.onnx     # same policy exported to ONNX
 ├── samples/            # a 3-second slice of real processed data (see Data format)
 ├── assets/             # README / paper figures (architecture, driving GIF, training curves)
-├── paper/              # technical report
+├── results/            # exported training logs (history.csv) + training_curves.ipynb
+├── paper/              # technical report (paper.pdf, LaTeX source paper.tex, paper.md, CLAIMS.md)
 ├── vehicle/            # CARLA sensor rig, telemetry, waypoints (+ reward used by drive.py RL mode)
 ├── dataset/            # TFRecord schema, direction labels, window manifest, tf.data pipeline
 ├── model/              # policy architecture and training metrics
@@ -263,7 +264,7 @@ for proto in tf.data.TFRecordDataset("samples/sample_drive.processed.tfrecord").
 
 ## Training details
 
-`config.yaml` defaults match the W&B run **"MLP - Generalized Cross Map"** ([`barzksni`](https://wandb.ai/drift-ai-models/drift-mlp/runs/barzksni), project `drift-mlp`). `artifacts/policy.keras` is that run's **epoch-10 checkpoint**: it was saved 1,114 s into the run, when epoch 10 completed.
+`config.yaml` defaults match the training run **`barzksni`** ("MLP - Generalized Cross Map"). `artifacts/policy.keras` is that run's **epoch-10 checkpoint**: epoch 10 completed 1,115 s into the run, and the checkpoint was saved 8 s later. The run's full metric history is in [`results/barzksni/`](results/barzksni), plotted in [`results/training_curves.ipynb`](results/training_curves.ipynb).
 
 | | |
 |---|---|
@@ -275,11 +276,15 @@ for proto in tf.data.TFRecordDataset("samples/sample_drive.processed.tfrecord").
 | Data filter | windows whose frames share one direction label ≥ 60%; quality flag `ok` |
 | Split rule | per recording and direction, first 70% of windows → train, remaining 30% → validation |
 | Validation | 50 batches every 50 training steps |
-| Run length | 53 epochs, 21,750 steps, 8.8 M windows seen, 1.6 h |
+| Run length | 53 epochs, 21,750 steps, 8.9 M windows seen, 1.6 h |
 
 Metrics logged: per-control losses, MAE/RMSE/R², per-direction loss, turn precision/recall/F1 (|steer| > 0.1), turn onset delay, lagged error and prediction smoothness.
 
-![Validation curves](assets/training_loss.png)
+![Loss curves](results/figures/loss.png)
+
+![Turn and direction metrics](results/figures/turns_directions.png)
+
+The dashed line marks the released epoch-10 checkpoint. Shortly after it, training briefly destabilizes before recovering around epoch 20. More plots and the paper's Table 1 are in the [notebook](results/training_curves.ipynb).
 
 ## Known quirks and limitations
 

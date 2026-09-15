@@ -2,7 +2,7 @@
 
 **Jordy Kieto**
 
-*Technical report · Code, data samples and policy: [github.com/JordyKieto/carla-imitation-learning](https://github.com/JordyKieto/carla-imitation-learning) · Training run: [W&B `barzksni`](https://wandb.ai/drift-ai-models/drift-mlp/runs/barzksni) · Video: [youtu.be/rr_uS4bf0B4](https://youtu.be/rr_uS4bf0B4)*
+*Technical report · Code, data samples and policy: [github.com/JordyKieto/carla-imitation-learning](https://github.com/JordyKieto/carla-imitation-learning) · Training curves: [results/training_curves.ipynb](https://github.com/JordyKieto/carla-imitation-learning/blob/main/results/training_curves.ipynb) · Video: [youtu.be/rr_uS4bf0B4](https://youtu.be/rr_uS4bf0B4)*
 
 ---
 
@@ -209,7 +209,7 @@ Even with maneuver-balanced *captures*, the balance by *window* is dominated by 
 
 ### 6.1 Protocol
 
-The model was trained with Adam (learning rate $3\times10^{-3}$, batch size 409) on the loss of §3. Windows were split *per recording and per direction*: the first 70% of each recording's windows of a given direction went to training and the remaining 30% to validation, giving 165,777 training and 71,108 validation windows with matching direction ratios. Every 50 steps the model was evaluated on 50 validation batches. The run lasted 53 epochs (21,750 steps, 8.78 M windows, 1.62 h), and checkpoints were written every 10 epochs. **The released policy is the epoch-10 checkpoint.**
+The model was trained with Adam (learning rate $3\times10^{-3}$, batch size 409) on the loss of §3. Windows were split *per recording and per direction*: the first 70% of each recording's windows of a given direction went to training and the remaining 30% to validation, giving 165,777 training and 71,108 validation windows with matching direction ratios. Every 50 steps the model was evaluated on 50 validation batches. The run lasted 53 epochs (21,750 steps, 8.88 M windows, 1.64 h), and checkpoints were written every 10 epochs. **The released policy is the epoch-10 checkpoint.**
 
 This split is a *temporal* hold-out within recordings. It measures interpolation to unseen moments of seen routes, not generalization to unseen routes or maps. We therefore use it only to diagnose fitting, never as evidence of driving ability.
 
@@ -219,29 +219,32 @@ Beyond per-control losses and MAE, we logged diagnostics aimed at driving-releva
 
 - **Turn detection.** With $\mathcal P = \{t : |\hat\delta_t| > 0.1\}$ and $\mathcal G = \{t : |\delta_t| > 0.1\}$, we report precision $|\mathcal P\cap\mathcal G|/|\mathcal P|$, recall $|\mathcal P\cap\mathcal G|/|\mathcal G|$ and their harmonic mean $F_1$.
 - **Turn onset delay** $\min\mathcal P - \min\mathcal G$, in frames.
-- **Lagged error** $\tfrac{1}{n-k}\sum_t|\hat a_t - a_{t+k}|$ for $k\in\{1,2,3\}$, which detects policies that merely echo the recent past.
+- **Lagged error** $\tfrac{1}{n-k}\sum_t|\hat a_t - a_{t+k}|$ for $k\in\{1,2,3\}$, the error against targets $k$ frames in the future. Error that shrinks with $k$ would indicate anticipation of upcoming controls; error that grows with $k$ indicates predictions tracking the current control.
 - **Smoothness** $\tfrac{1}{n-1}\sum_t |\hat a_{t+1}-\hat a_t|$.
 - **Per-direction MSE**, to expose the class imbalance of §5.3.
 
 ### 6.3 Results
 
-![Figure 3: Training curves](../assets/training_loss.png)
+![Figure 3a: Loss curves](../results/figures/loss.png)
 
-> **Figure 3.** Validation metrics over the full run (W&B `barzksni`): turn $F_1$, turn-delay validity, turn onset delay, throttle loss, steering loss and throttle smoothness.
+![Figure 3b: Turn and direction metrics](../results/figures/turns_directions.png)
+
+> **Figure 3.** Training curves of the full run, regenerated from the exported metric history in `results/training_curves.ipynb`. Top: total train/validation loss and per-control validation loss. Bottom: validation turn detection, turn onset delay and per-direction validation MSE. Faint lines are raw evaluations, solid lines a 9-point moving average; the dashed line marks the released epoch-10 checkpoint.
 
 **Table 1.** Offline validation metrics. Epoch 1: last evaluation of the epoch. Other rows: mean over all validation evaluations within the stated epochs.
 
 | | Val loss | MAE throttle | MAE brake | MAE steer | Turn $F_1$ | Val MSE straight | left | right |
 |---|---|---|---|---|---|---|---|---|
-| Epoch 1 (end) | 1.27e-2 | 0.072 | 0.009 | 0.056 | 0.39 | 5.8e-3 | 9.3e-3 | 1.3e-2 |
-| **Epoch 10 (released)** | **1.48e-3** | **0.017** | **0.016** | **0.013** | **0.77** | **0.81e-3** | **0.97e-3** | **1.59e-3** |
-| Epochs 50–53 | 0.82e-3 | 0.008 | 0.005 | 0.006 | 0.81 | 0.41e-3 | 1.07e-3 | 1.38e-3 |
+| Epoch 1 (end) | 1.26e-2 | 0.072 | 0.009 | 0.056 | 0.39 | 5.8e-3 | 9.3e-3 | 1.3e-2 |
+| **Epoch 10 (released)** | **1.53e-3** | **0.017** | **0.017** | **0.013** | **0.78** | **0.84e-3** | **0.98e-3** | **1.57e-3** |
+| Epochs 50–53 | 0.70e-3 | 0.008 | 0.004 | 0.006 | 0.82 | 0.36e-3 | 0.93e-3 | 0.83e-3 |
 
-Three observations follow.
+Four observations follow.
 
-1. **Most of the offline fit happens early.** From epoch 10 to epoch ≥ 50 the validation loss roughly halves again. Turn $F_1$, the metric closest to a driving decision, only moves from 0.77 to 0.81.
-2. **Turns remain the hard case.** Throughout training, right-turn validation error stays roughly 2–3× straight-driving error, and left turns are also above straight by epoch 50. This matches the 5–6% share of turn windows, and it is exactly where closed-loop failures would be expected.
-3. **Per-batch $R^2$ is uninformative here.** Logged $R^2$ values are extremely negative (e.g. $-3\times10^{3}$ for steering at epoch 10) even though MAE is around 0.01. Validation batches are contiguous slices of recordings, so the target variance *within* a batch is often near zero and $R^2 = 1 - \mathrm{SS}_{\text{res}}/\mathrm{SS}_{\text{tot}}$ blows up. We report this so the metric is not misread, and recommend dataset-level $R^2$ in future runs.
+1. **Most of the offline fit happens early.** From epoch 10 to epoch ≥ 50 the validation loss roughly halves again. Turn $F_1$, the metric closest to a driving decision, only moves from 0.78 to 0.82.
+2. **Turns remain the hard case.** Throughout training, right-turn validation error stays about 2× straight-driving error, and by epochs 50–53 left-turn error is about 2.6× straight. This matches the 5–6% share of turn windows, and it is exactly where closed-loop failures would be expected.
+3. **Per-batch $R^2$ is uninformative here.** Logged $R^2$ values are extremely negative (e.g. $-3.5\times10^{3}$ for steering at epoch 10) even though MAE is around 0.01. Validation batches are contiguous slices of recordings, so the target variance *within* a batch is often near zero and $R^2 = 1 - \mathrm{SS}_{\text{res}}/\mathrm{SS}_{\text{tot}}$ blows up. We report this so the metric is not misread, and recommend dataset-level $R^2$ in future runs.
+4. **Training briefly destabilized right after the released checkpoint.** Shortly after epoch 10, train and validation loss spike by more than an order of magnitude (validation loss peaks at $5.7\times10^{-2}$, 37× the epoch-10 mean) and turn $F_1$ collapses to 0, before smoothed validation loss and turn $F_1$ return to their epoch-10 levels around epochs 20 and 22 (Figure 3). The released policy therefore precedes this episode. Its cause was not investigated.
 
 Offline, a steering MAE of ≈0.013 means the policy predicts the expert's steering closely *on expert states*. By §3, this does not by itself say the policy can drive.
 
@@ -342,11 +345,11 @@ The systematic demonstration pipeline emerged after earlier attempts with reinfo
 
 | Evidence | Value |
 |---|---|
-| Training run | W&B `drift-ai-models/drift-mlp/barzksni` ("MLP - Generalized Cross Map"), created 2026-05-10 22:00:32 UTC |
+| Training run | `barzksni` ("MLP - Generalized Cross Map"), created 2026-05-10 22:00:32 UTC; full metric history in `results/barzksni/`, plotted in `results/training_curves.ipynb` |
 | Checkpoint | `artifacts/policy.keras`, Keras 3.13.2, `date_saved` 2026-05-10 22:19:15 UTC |
-| Link | epoch 10 completed at 1,114 s = 22:19:06 UTC; checkpoints every 10 epochs |
+| Link | epoch 10 completed at 1,115 s = 22:19:07 UTC; checkpoint saved 8 s later; checkpoints every 10 epochs |
 | Training maps | Town01, Town02 |
-| Training data | 448 recordings dated 2026-05-09/10; 236,882 windows (W&B sampling summary = manifest subset, identical direction ratios) |
+| Training data | 448 recordings dated 2026-05-09/10; 236,882 windows (training-log sampling summary = manifest subset, identical direction ratios) |
 | Excluded data | `recovery`-tagged recordings (2026-05-17) postdate the checkpoint; no DAgger-mode recordings |
 | Code timeline | MLP policy (2026-01-27) → sensor-sync and data-contract fixes (2026-03-25) → first end-to-end driving (2026-04-07) → route generator (2026-05-05) → training (2026-05-10) → "all maps" model milestone (2026-05-12) |
 | ONNX | `artifacts/policy.onnx`, max absolute deviation from Keras < 4e-7 |

@@ -1,4 +1,4 @@
-"""Offline action-prediction metrics logged during training (names match the W&B runs).
+"""Offline action-prediction metrics logged during training (names match results/barzksni/history.csv).
 
 All inputs are numpy arrays: targets/preds (B, 3) as [throttle, brake, steer],
 directions (B,) as ids into DIRECTION_NAMES.

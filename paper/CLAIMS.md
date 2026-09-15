@@ -2,27 +2,28 @@
 
 Every claim in `paper.md` is listed here with its evidence class, following the audit protocol used for the report:
 
-- **M**: quantitatively measured, with a recoverable artifact (W&B run, manifest, checkpoint, code)
+- **M**: quantitatively measured, with a recoverable artifact (training logs, manifest, checkpoint, code)
 - **Q**: qualitatively observed (video, screenshot, author observation), no systematic measurement
 - **I**: inferred interpretation of M/Q evidence
 - **A**: confirmed by the author (first-hand knowledge of the experiment), not independently recoverable from artifacts
 - **U**: unsupported or unverified: needs more evidence before it can be stated as fact
 
-Sources: **W&B** = run [`barzksni`](https://wandb.ai/drift-ai-models/drift-mlp/runs/barzksni). **Manifest** = the window manifest from the original `drift` data pipeline, restricted to recordings dated 2026-05-09/10. **Ckpt** = `artifacts/policy.keras` metadata and graph. **Git** = commit history of the original research repository.
+Sources: **Logs** = full metric history of training run `barzksni` in [`results/barzksni/`](../results/barzksni) (`history.csv`, `summary.json`), plotted in [`results/training_curves.ipynb`](../results/training_curves.ipynb). **Manifest** = the window manifest from the original `drift` data pipeline, restricted to recordings dated 2026-05-09/10. **Ckpt** = `artifacts/policy.keras` metadata and graph. **Git** = commit history of the original research repository.
 
 | # | Claim | Class | Evidence |
 |---|---|---|---|
-| 1 | The released policy is the epoch-10 checkpoint of W&B run `barzksni` | M | Ckpt `date_saved` 2026-05-10 22:19:15 UTC; run created 22:00:32 UTC; W&B logs epoch 10 completing at 1,114 s (22:19:06 UTC); checkpointing every 10 epochs |
-| 2 | Training set: 236,882 five-frame windows from 448 recordings | M | W&B `sampling/manifest_sampled/windows` = 236,882; Manifest rows dated 05-09/10 = 236,882 across 448 files |
-| 3 | Direction mix 89.47% straight / 5.85% left / 4.67% right | M | W&B sampling ratios and Manifest agree to 4 significant figures |
+| 1 | The released policy is the epoch-10 checkpoint of training run `barzksni` | M | Ckpt `date_saved` 2026-05-10 22:19:15 UTC; run created 22:00:32 UTC; Logs show epoch 10 completing at 1,115 s (22:19:07 UTC); checkpointing every 10 epochs |
+| 2 | Training set: 236,882 five-frame windows from 448 recordings | M | Logs `sampling/manifest_sampled/windows` = 236,882; Manifest rows dated 05-09/10 = 236,882 across 448 files |
+| 3 | Direction mix 89.47% straight / 5.85% left / 4.67% right | M | Logs sampling ratios and Manifest agree to 4 significant figures |
 | 4 | ≈3.3 h of 20 Hz driving | M (derived) | 236,882 windows / 20 Hz; each file has at most 4 extra frames not counted as windows |
 | 5 | Most recordings are 30 s systematic route captures | M + I | Median 595 windows per file (600 frames = 30 s at 20 Hz = `collect.py` defaults); route tool committed 2026-05-05, before recording |
-| 6 | Train/val = 165,777 / 71,108 windows; 53 epochs; 21,750 steps; 8.78 M windows; 1.62 h | M | W&B summary/history |
-| 7 | Epoch-10 validation: loss 1.48e-3; MAE throttle 0.0166, brake 0.0164, steer 0.0131; turn-F1 0.765 | M | Mean of W&B validation logs during epoch 10 |
-| 8 | Per-direction val loss at epoch 10: straight 0.81e-3, left 0.97e-3, right 1.59e-3 | M | W&B |
-| 9 | Late training (epoch ≥ 50): val loss 0.82e-3, steer MAE 0.0062, turn-F1 0.81 | M | W&B |
-| 10 | Validation windows come from the same recordings as training (temporal hold-out, not route/map hold-out) | M | `split_train_val` in code; W&B split counts |
-| 11 | Per-batch R² is strongly negative and not interpretable | M + I | W&B; non-shuffled validation batches have near-zero target variance |
+| 6 | Train/val = 165,777 / 71,108 windows; 53 epochs; 21,750 steps; 8.88 M windows; 1.64 h | M | Logs |
+| 7 | Epoch-10 validation: loss 1.53e-3; MAE throttle 0.0170, brake 0.0165, steer 0.0133; turn-F1 0.78 | M | Mean of all validation evaluations during epoch 10 (Logs; notebook Table 1) |
+| 8 | Per-direction val loss at epoch 10: straight 0.84e-3, left 0.98e-3, right 1.57e-3 | M | Logs |
+| 9 | Late training (epochs 50–53): val loss 0.70e-3, steer MAE 0.0059, turn-F1 0.82 | M | Logs |
+| 9a | Training briefly destabilized right after epoch 10 (val loss spike to 5.7e-2, turn-F1 to 0) and recovered by epochs 20–22 | M | Logs; notebook loss and turn plots |
+| 10 | Validation windows come from the same recordings as training (temporal hold-out, not route/map hold-out) | M | `split_train_val` in code; Logs split counts |
+| 11 | Per-batch R² is strongly negative and not interpretable | M + I | Logs; non-shuffled validation batches have near-zero target variance |
 | 12 | 1,358,211 parameters; exact layer dimensions | M | Ckpt |
 | 13 | Positional embedding is a fixed random constant, not learned | M | Ckpt `config.json` has no Embedding layer; constant tensor stored as an input to `add` |
 | 14 | Released policy (Keras) and ONNX export agree to < 4e-7 | M | `export_onnx.py` parity check |

@@ -48,8 +48,9 @@ data:
   window_min_direction_share: 0.60 # drop windows whose frames disagree on direction
 
 # ------------------------------------------------------------
-# Training (train.py). Defaults match W&B run barzksni
+# Training (train.py). Defaults match training run barzksni
 # ("MLP - Generalized Cross Map"); artifacts/policy.keras is its epoch-10 checkpoint.
+# Its metric history: results/barzksni/history.csv, results/training_curves.ipynb.
 # ------------------------------------------------------------
 training:
   run_name: mlp-generalized-cross-map
