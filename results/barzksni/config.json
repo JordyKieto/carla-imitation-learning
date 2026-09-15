@@ -1,0 +1,49 @@
+{
+  "batch_size": 409,
+  "brake_loss_weight": 1,
+  "checkpoint_prefix": "checkpoints/mlp/",
+  "dataset_sample_fraction": 1,
+  "direction_left_steer_max": -0.08,
+  "direction_right_steer_min": 0.08,
+  "direction_sample_ratios": {
+    "left": 0.4666666666666666,
+    "right": 0.4666666666666666,
+    "straight": 0.06666666666666667
+  },
+  "direction_straight_abs_steer_max": 0.08,
+  "epochs": 100,
+  "learning_rate": 0.003,
+  "lidar_shape": [
+    64,
+    64,
+    1
+  ],
+  "manifest_random_state": 42,
+  "only_quality_ok": true,
+  "preserve_natural_distribution": true,
+  "s3_processed_prefix": "processed/mlp/v1/",
+  "sampling_manifest_version": 2,
+  "stack_size": 5,
+  "steer_loss_weight": 1,
+  "telemetry_shape": [
+    5
+  ],
+  "throttle_loss_weight": 1,
+  "train_split": 0.7,
+  "train_tags": [],
+  "vision_resize": [
+    96,
+    96
+  ],
+  "vision_shape": [
+    224,
+    224,
+    3
+  ],
+  "waypoints_shape": [
+    25,
+    3
+  ],
+  "window_target_min_share": 0.6,
+  "windows_manifest_path": "./manifests/windows_manifest.parquet"
+}
