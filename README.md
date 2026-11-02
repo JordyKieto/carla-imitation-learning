@@ -6,7 +6,9 @@
   <a href="paper/paper.pdf"><b>📄 Paper (PDF)</b></a> &nbsp;·&nbsp;
   <a href="https://youtu.be/rr_uS4bf0B4"><b>▶️ Video</b></a> &nbsp;·&nbsp;
   <a href="results/training_curves.ipynb"><b>📈 Training curves</b></a> &nbsp;·&nbsp;
-  <a href="artifacts/"><b>🧠 Policy (Keras / ONNX)</b></a>
+  <a href="artifacts/"><b>🧠 Policy (Keras / ONNX)</b></a> &nbsp;·&nbsp;
+  <a href="https://huggingface.co/jordykieto/carla-imitation-learning"><b>🤗 Model</b></a> &nbsp;·&nbsp;
+  <a href="https://huggingface.co/datasets/jordykieto/carla-driving-demos"><b>🤗 Dataset</b></a>
 </p>
 
 A compact multimodal driving policy trained by **behavioral cloning** on expert demonstrations in the [CARLA](https://carla.org) simulator. The policy takes a short history of camera, LiDAR, vehicle telemetry and route waypoints and outputs continuous `throttle`, `brake` and `steer`. It then drives closed-loop: each prediction changes the next observation.
