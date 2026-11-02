@@ -2,13 +2,19 @@
 
 <p align="center"><img src="assets/driving.gif" alt="The learned policy driving closed-loop in CARLA" width="720"></p>
 
+<!-- research-links:start -->
 <p align="center">
-  <a href="paper/paper.pdf"><b>📄 Paper (PDF)</b></a> &nbsp;·&nbsp;
-  <a href="https://youtu.be/rr_uS4bf0B4"><b>▶️ Video</b></a> &nbsp;·&nbsp;
-  <a href="results/training_curves.ipynb"><b>📈 Training curves</b></a> &nbsp;·&nbsp;
-  <a href="artifacts/"><b>🧠 Policy (Keras / ONNX)</b></a> &nbsp;·&nbsp;
-  <a href="https://huggingface.co/jordykieto/carla-imitation-learning"><b>🤗 Model</b></a> &nbsp;·&nbsp;
-  <a href="https://huggingface.co/datasets/jordykieto/carla-driving-demos"><b>🤗 Dataset</b></a>
+  <a href="https://arxiv.org/abs/2609.17757"><img alt="Paper: arXiv 2609.17757" src="https://img.shields.io/badge/Paper-arXiv%202609.17757-b31b1b?logo=arxiv&logoColor=white"></a>
+  <a href="https://github.com/JordyKieto/carla-imitation-learning"><img alt="Code: GitHub" src="https://img.shields.io/badge/Code-GitHub-24292f?logo=github&logoColor=white"></a>
+  <a href="https://huggingface.co/jordykieto/carla-imitation-learning"><img alt="Models: Hugging Face" src="https://img.shields.io/badge/Models-Hugging%20Face-ffd21e?logo=huggingface"></a>
+  <a href="https://huggingface.co/datasets/jordykieto/carla-driving-demos"><img alt="Datasets: Hugging Face" src="https://img.shields.io/badge/Datasets-Hugging%20Face-ffd21e?logo=huggingface"></a>
+  <a href="https://youtu.be/rr_uS4bf0B4"><img alt="Demo: YouTube" src="https://img.shields.io/badge/Demo-YouTube-ff0000?logo=youtube&logoColor=white"></a>
+</p>
+<p align="center"><sub>More research: <a href="https://github.com/JordyKieto/ppo-hyrule">The Legend of PPO: Learning to Fight in Hyrule</a> · <a href="https://github.com/JordyKieto/puffermoba-dyna">Learning in Dreams, Winning in Reality</a> · <a href="https://github.com/JordyKieto/neural-simulators">Neural Simulators for Interactive Environments</a> · <a href="https://jordykieto.tech/research">all research ↗</a></sub></p>
+<!-- research-links:end -->
+<p align="center">
+  In this repo: <a href="paper/paper.pdf">paper (PDF)</a> · <a href="results/training_curves.ipynb">training curves</a> ·
+  <a href="artifacts/">policy (Keras / ONNX)</a>
 </p>
 
 A compact multimodal driving policy trained by **behavioral cloning** on expert demonstrations in the [CARLA](https://carla.org) simulator. The policy takes a short history of camera, LiDAR, vehicle telemetry and route waypoints and outputs continuous `throttle`, `brake` and `steer`. It then drives closed-loop: each prediction changes the next observation.
